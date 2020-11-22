@@ -1,0 +1,289 @@
+########引入包############
+import pygame, os
+from pygame.locals import *
+import random
+# from 生成迷宫32 import MAP
+import numpy as np
+
+#########引入宏##############
+######显示宏###
+RUN = True
+#####END#####
+SIZE_SCREEN = (450, 450)  # 屏幕尺寸
+######颜色
+QP_C = (200, 200, 200)
+WALL_COLOR = (255, 200, 220)
+#####END
+INF = 1000
+#####迷宫尺寸
+STEP = 50  # 迷宫的阶数
+MAPRANK = 50
+MAPCROSS = 50
+X = 0  # 迷宫起始横坐标
+Y = 0  # 迷宫起始纵坐标
+BS = 30  # 方格尺寸
+# 线宽
+RWW = 2  # 迷宫线宽
+####END
+# man
+MX_C = 3  # 勇士用于计算的横坐标
+MY_C = 3  # 勇士用于计算的纵坐标
+#####END
+# 鬼
+GX_C = 1  # 鬼用于计算的横坐标
+GY_C = 0  # 鬼用于计算的纵坐标
+#####END
+#########引入函数##################
+
+# 创建一个迷宫地图
+# 这个地图是连通的
+# #      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9
+# MAP = [[INF,  INF, 1, INF, INF,INF, INF, 1, INF, INF, INF,  INF,  INF, INF, INF],  # 0
+#        [1,      1,      3,   8, 5,1, 3, 8, 7,1, 3, 2, INF,INF,INF ],  # 0
+#        [INF, 2, INF, INF, INF, INF, INF, INF, INF, INF,INF, 2, INF, INF, INF],  # 0
+#        [INF, 1, 1, 5, 1,INF, INF, INF, 5, 1,1, 1, 1, 5, 1],  # 0
+#        [INF, INF, INF, 1, INF,INF, INF, INF, 5, INF,INF, INF, INF, 1, INF],  # 0
+#        [INF, INF, INF, 1, INF, INF, INF, INF, 1, INF,INF, INF,  INF,    1,  INF],
+#        [INF, INF, INF, 6,   1,  1,   1,   1,  5, INF,   INF, INF, INF, 5, 1],  # 0
+#        [INF, INF, INF, 1, INF, INF, INF, INF, 5, INF, INF, INF, INF, 1, INF],  # 0
+#        [INF, INF, INF, 1, INF, INF, INF, INF, 1, INF, INF, INF, INF, 1, INF],
+#        [1,    1,    1,  5,  1, 2, 1,    1,  5,  INF,  INF, INF,    INF,  5,  2],  # 0
+#        [INF, INF, INF, 1, INF, INF, INF, INF, 5, INF, INF, INF, INF, 1, INF],  # 0
+#        [INF, INF, INF, 1, INF, INF, INF, INF, 1, INF, INF,   1,  1,  1, INF],
+#        [INF, INF, INF, 5,   1,  2, INF,  INF,1,INF,  2,   1,INF, 1, INF],  # 0
+#        [INF, INF, INF, 1, INF,  INF, INF,  INF,1, 1,  10, INF, INF, 1, INF],  # 0
+#        [INF, INF, INF, 1, INF,  INF, INF,  INF, 1, INF, INF, INF, INF, 2, INF],
+#        # 0
+#        ]  # 6
+
+
+
+
+def buildmap(STEP):
+    w = STEP
+
+    MAP = np.ones((w, w), dtype=int)
+    MAP = MAP.dot(INF)
+    mark = np.zeros((w, w), dtype=int)
+
+    lis = [(0, 1, 0), (0, 0, 2), (1, 0, 0)]
+
+    mark[0][0] = 1
+
+    while True:
+
+        if len(lis) == 0:
+            break
+
+        x = random.choice(lis)
+        a = x[0]
+        b = x[1]
+        c = x[2]
+
+        if (a == 0 and c == 0) or (a == w - 1 and c == 2) or (b == 0 and c == 3) or (b == w - 1 and c == 1):
+            lis.remove(x)
+            continue
+
+        if c == 0:
+            a1 = a - 1
+            b1 = b
+        if c == 1:
+            a1 = a
+            b1 = b + 1
+        if c == 2:
+            a1 = a + 1
+            b1 = b
+        if c == 3:
+            a1 = a
+            b1 = b - 1
+
+        d = (c + 2) % 4
+
+        if mark[a][b] == 0 or mark[a1][b1] == 0:
+
+            if mark[a][b] == 0:
+                for i in range(4):
+                    if i != c:
+                        lis.append((a, b, i))
+
+            if mark[a][b] == 1:
+                for i in range(4):
+                    if i != d:
+                        lis.append((a1, b1, i))
+
+                lis.remove((a, b, c))
+
+                # MAP[a][b][c] = 1
+                # MAP[a1][b1][d] = 1
+
+                MAP[a][b] = random.randint(1,10)
+
+                mark[a1][b1] = 1
+
+        else:
+            lis.remove((a, b, c))
+
+    # 随便推墙
+
+    count = 5
+    while True:
+       a = random.choice([1,2,3,4,5])
+       b = random.choice([1,2,3,4,5])
+       c = random.choice([0,1,2,3])
+
+       if c == 0:
+          a1 = a-1
+          b1 = b
+       if c == 1:
+          a1 = a
+          b1 = b+1
+       if c == 2:
+          a1 = a+1
+          b1 = b
+       if c == 3:
+          a1 = a
+          b1 = b-1
+
+       d = (c+2)%4
+
+
+       if MAP[a][b] == 0:
+           MAP[a][b] = 1
+           if 
+
+            MAP[a1][b1] = 1
+            count = count - 1
+
+       if count == 0:
+          break
+
+    # MAP[STEP-1][STEP-1][1] = 1
+    # MAP =MAP.tolist()
+    # for k in range(STEP):
+    #     MAP[k].append([0,0,0,0])
+    # MAP[STEP - 1][STEP][3] = 1
+    # MAP = np.array(MAP)
+    print(MAP)
+    return MAP
+MAP = buildmap(STEP)
+def F(GX_C, GY_C, MX_C, MY_C, g):
+    global MAP
+    h = (abs(GY_C - MY_C) + abs(GX_C - MX_C))+MAP[GX_C][GY_C]
+    f = g + h
+    return g, h, f
+
+def _A(MX_C, MY_C, gx, gy, gmap):
+    BACKX = -1
+    BACKY = -1
+    GX_C = gx
+    GY_C = gy
+    # 0.把当前节点放入OPEN
+    f = F(GX_C, GY_C, MX_C, MY_C, 0)[2]
+    OPEN = {}
+    OPEN[GX_C, GY_C, 0] = f
+    CLOSE = {}
+    father = {}
+    father[GX_C, GY_C, 0] = 0
+    # 1.判断表非空
+    while OPEN:
+        # 2.表第一个节点放入close
+        # 7.代价最小的删除OPEN表加入CLOSE表
+        n = sorted(OPEN.items(), key=lambda d: d[1])
+        CLOSE[n[0][0]] = n[0][1]
+
+        del OPEN[n[0][0]]
+        GX_C = n[0][0][0]
+        GY_C = n[0][0][1]
+        g = n[0][0][2]
+        # 3.n为目标节点？
+
+        if GX_C == MX_C and GY_C == MY_C:
+            BACKX, BACKY, bg = GX_C, GY_C, g
+            break
+        # 4.n可拓展？
+        # 可走的节点里没有我爸爸
+        # 5找出子节点加入open表father:键值对-》儿子：爸爸
+        # 6.计算各节点代价
+        if GY_C + 1< MAPCROSS:
+            if gmap[GX_C][GY_C+1] != INF and (GX_C, GY_C + 1, g - 1) != father[GX_C, GY_C, g]:  # 右
+                f1 = F(GX_C, GY_C + 1, MX_C, MY_C, g + 1)[2]
+                if (GX_C, GY_C + 1, g + 1) not in OPEN:
+                    OPEN[GX_C, GY_C + 1, g + 1] = f1
+                    father[GX_C, GY_C + 1, g + 1] = (GX_C, GY_C, g)
+        if  GY_C - 1 >=0:
+            if gmap[GX_C][GY_C-1] != INF and (GX_C, GY_C - 1, g - 1) != father[GX_C, GY_C, g]:  # 左
+                f3 = F(GX_C, GY_C - 1, MX_C, MY_C, g + 1)[2]
+                if (GX_C, GY_C - 1, g + 1) not in OPEN:
+                    OPEN[GX_C, GY_C - 1, g + 1] = f3
+                    father[GX_C, GY_C - 1, g + 1] = (GX_C, GY_C, g)
+        if GX_C + 1 < MAPRANK:
+            if gmap[GX_C+1][GY_C] != INF and (GX_C + 1, GY_C, g - 1) != father[GX_C, GY_C, g]:  # 下
+                f2 = F(GX_C + 1, GY_C, MX_C, MY_C, g + 1)[2]
+                if (GX_C + 1, GY_C, g + 1) not in OPEN:
+                    OPEN[GX_C + 1, GY_C, g + 1] = f2
+                    father[GX_C + 1, GY_C, g + 1] = (GX_C, GY_C, g)
+        if GX_C - 1 >= 0:
+            if gmap[GX_C-1][GY_C] != INF and (GX_C - 1, GY_C, g - 1) != father[GX_C, GY_C, g]:  # 上
+                f0 = F(GX_C - 1, GY_C, MX_C, MY_C, g + 1)[2]
+                if (GX_C - 1, GY_C, g + 1) not in OPEN:
+                    OPEN[GX_C - 1, GY_C, g + 1] = f0
+                    father[GX_C - 1, GY_C, g + 1] = (GX_C, GY_C, g)
+    # 找爸爸
+    back = []
+    if BACKX != -1 and BACKY != -1:
+        back = []
+        back.append((BACKX, BACKY))
+        while father[BACKX, BACKY, bg] != 0:
+            wk = father[BACKX, BACKY, bg]
+            BACKX = wk[0]
+            BACKY = wk[1]
+            bg = wk[2]
+            back.append((BACKX, BACKY))
+        back = list(reversed(back))#返回的是从起点指向终点的路径
+        del back[0]
+        return back
+    else:
+        print("error")
+        back = [(0, 0)]
+        return back
+    return
+
+# 画出小地图---1
+def _navigation(MAP, BS, back):
+
+
+    # 画网格线
+    for i in range(MAPRANK):
+        for j in range(MAPCROSS):
+            if MAP[i][j] == INF:
+                    pygame.draw.rect(screen, (255, 250, 250),
+                        ((X + j*BS, Y+ i*BS), (BS, BS)),
+                        0)
+    pygame.draw.circle(screen, (0, 255, 0),
+                       (X + MY_C * BS + BS // 2, Y + MX_C * BS + BS // 2),  # 勇士
+                       BS // 2,
+                       0)
+    pygame.draw.circle(screen, (255, 0, 0),
+                       (X + GY_C * BS + BS // 2, Y + GX_C * BS + BS // 2),  # 鬼
+                       BS // 2,
+                       0)
+    if len(back) > 12:
+        screen.blit(pygame.font.Font('freesansbold.ttf',
+                                     15).render(f"{back[:10]}", True, (200, 200, 200)),
+                    (210, 605))
+        screen.blit(pygame.font.Font('freesansbold.ttf',
+                                     15).render(f"{back[10:]}", True, (200, 200, 200)),
+                    (210, 620))
+    else:
+        screen.blit(pygame.font.Font('freesansbold.ttf',
+                                     15).render(f"{back}", True, (200, 200, 200)),
+                    (210, 605))
+
+    # 画出路径
+    for i in range(1, len(back)):
+        pygame.draw.line(screen, (200, 240, 60),
+                         (X + back[i - 1][1] * BS + BS // 2, Y + back[i - 1][0] * BS + BS // 2),
+                         (X + back[i][1] * BS + BS // 2, Y + back[i][0] * BS + BS // 2),
+                         5)
+# 函数主体
+
