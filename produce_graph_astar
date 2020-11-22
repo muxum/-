@@ -1,0 +1,64 @@
+import 地图示意
+from 地图示意 import MAP,INF,_A,F
+import numpy as np
+import random
+import copy
+
+global end_x,end_y,road
+maze = MAP
+#print(MAP)
+n = 5
+row,col = np.shape(maze)
+print(row,col)
+ran = np.zeros((row,col))
+
+def cost(path):
+    sum = 0
+    for i in range(len(path)):
+        sum += maze[path[i][0]][path[i][1]]
+    return sum
+
+coordinate = []
+i = 0
+#   随机在maze上选择n个点作为目的地
+while i < n:
+    a = random.randint(0,row-1)
+    b = random.randint(0,col-1)
+    if ran[a,b] == 0 and maze[a][b] != INF:
+        ran[a,b] = -1   #   选过的点就置-1，不再考虑
+        coordinate.append([a,b])
+        i += 1
+print(n,"个目的地：",coordinate)
+#   选好了n个节点，接下来开始生成图
+
+graph = np.zeros((n,n))
+
+edge = [[0 for i in range(col)] for j in range(row)]
+
+for i in range (0,n):
+    for j in range(0,n):
+        #   j轮流抽取候选点
+        end_x = coordinate[j][0]
+        end_y = coordinate[j][1]
+        #MIN = 100000.0
+        #   生成代价
+        
+        f = []
+        if i != j :
+            
+            f = _A(coordinate[i][0],coordinate[i][1],end_x,end_y,maze)# _A会返回一条从j到i的最短路径
+            f = copy.deepcopy(list(reversed(f)))#存入的是从终点指向起点的路径
+            f.append((end_x,end_y))#把当前的节点加上
+            #print(MIN)
+            #print("min road:",m_road)
+            #print(f)
+            #print(len(f))
+            graph[i,j] = cost(f)
+            edge[i][j] = f
+            
+        else :
+            graph[i,j] = -1
+            
+        del f
+print(graph)
+print(edge)
