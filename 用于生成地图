@@ -1,0 +1,131 @@
+#########引入包############
+
+import random
+import numpy as np
+#########引入宏##############
+
+#####迷宫尺寸
+STEP = 7#迷宫的阶数
+X = 20#迷宫起始横坐标
+Y = 20#迷宫起始纵坐标
+WALL = 0
+#线宽
+RWW = 5 #迷宫线宽
+#########引入函数##################
+####3####初始化####################
+
+
+#创建一个迷宫地图
+#这个地图是连通的
+INF = 1000
+
+
+w = STEP
+
+MAP = np.ones((w,w), dtype = int)
+MAP = MAP.dot(INF)
+mark = np.zeros((w,w), dtype = int)      
+
+lis = [(0,1,0),(0,0,2),(1,0,0)]
+
+
+
+mark[0][0] = 1
+
+while True:
+
+   if len(lis) == 0 :       
+       break
+       
+   x = random.choice(lis)
+   print(x)
+   a = x[0]
+   b = x[1]
+   c = x[2]
+
+   if (a == 0 and c == 0)or(a == w-1 and c == 2)or(b == 0 and c == 3)or(b == w-1 and c == 1):
+       lis.remove(x)
+       continue
+   
+   if c == 0:
+      a1 = a-1
+      b1 = b
+   if c == 1:
+      a1 = a
+      b1 = b+1
+   if c == 2:
+      a1 = a+1
+      b1 = b
+   if c == 3:
+      a1 = a
+      b1 = b-1
+
+    
+   d = (c+2)%4
+
+
+   if mark[a][b] == 0 or mark[a1][b1] == 0:
+       
+     if  mark[a][b] == 0:
+       for i in range(4):                        
+         if i != c:
+              lis.append((a,b,i))
+                          
+     if  mark[a][b] == 1:
+       for i in range(4):
+         if i != d:
+              lis.append((a1,b1,i))
+                       
+       lis.remove((a,b,c))
+       
+       # MAP[a][b][c] = 1
+       # MAP[a1][b1][d] = 1
+
+       MAP[a][b] = 1
+
+       mark[a1][b1] = 1
+       
+   else:
+       lis.remove((a,b,c))
+       
+
+
+#随便推墙
+#
+# count = 10
+# while True:
+#    a = random.choice([1,2,3,4,5])
+#    b = random.choice([1,2,3,4,5])
+#    c = random.choice([0,1,2,3])
+#
+#    if c == 0:
+#       a1 = a-1
+#       b1 = b
+#    if c == 1:
+#       a1 = a
+#       b1 = b+1
+#    if c == 2:
+#       a1 = a+1
+#       b1 = b
+#    if c == 3:
+#       a1 = a
+#       b1 = b-1
+#
+#    d = (c+2)%4
+#
+#
+#    if MAP[a][b][c] == 0:
+#         MAP[a][b][c] = 1
+#         MAP[a1][b1][d] = 1
+#         count = count - 1
+#
+#    if count == 0:
+#       break
+#
+# MAP[STEP-1][STEP-1][1] = 1
+# MAP =MAP.tolist()
+# for k in range(STEP):
+#     MAP[k].append([0,0,0,0])
+# MAP[STEP - 1][STEP][3] = 1
+# MAP = np.array(MAP)
+print(MAP)
