@@ -25,17 +25,17 @@ BS = min(SIZE_SCREEN)//STEP  # 方格尺寸
 RWW = 2  # 迷宫线宽
 ####END
 ####主体
-C = 5
+C = 12
 customers = []
 R = 3
 restaurants = []
 W = 3
 waiter = []
 #####END
-pygame.init()
-screen = pygame.display.set_mode(SIZE_SCREEN)
-pygame.display.set_caption("外卖模拟系统")
-screen.fill(QP_C)
+
+
+# 造图
+
 def buildmap(STEP):
     w = STEP
 
@@ -103,6 +103,8 @@ def buildmap(STEP):
             lis.remove((a, b, c))
     print(MAP)
     return MAP
+
+# A*
 
 def F(GX_C, GY_C, MX_C, MY_C, g):
     global MAP
@@ -185,32 +187,9 @@ def _A(MX_C, MY_C, gx, gy, gmap):
         return back
     return
 
-def _navigation(MAP, BS, back):
-    # 画网格线
-    for i in range(MAPRANK):
-        for j in range(MAPCROSS):
-            if MAP[i][j] == INF:
-                    pygame.draw.rect(screen, ROAD_C,
-                        ((X + j*BS, Y+ i*BS), (BS, BS)),
-                        0)
-        # 画出图
-    for i in range(C+R):
-        for j in range(C+R):
-            if edge[i][j] != 0:
-                for e in edge[i][j]:
-                    pygame.draw.rect(screen, (255,250, 3),
-                                     ((X + e[1] * BS, Y + e[0] * BS), (BS, BS)),
-                                     0)
-    # 画出顾客
-    for c in range(len(customers)):
-        screen.blit(pygame.font.Font('freesansbold.ttf',
-                                    15).render(f"{c+1}", True, (255, 0, 0)),
-                    (X + customers[c][1]* BS + BS // 2, Y + customers[c][0]* BS + BS // 2 ) )
-    #画出饭店
-    for r in range(len(restaurants)):
-        screen.blit(pygame.font.Font('freesansbold.ttf',
-                                     20).render(f"{r + 1}", True, (230, 5, 250)),
-                    (X + restaurants[r][1] * BS + BS // 2, Y + restaurants[r][0] * BS + BS // 2))
+#显示组件
+
+
 # 函数主体
 #"""
 
@@ -269,9 +248,9 @@ print(restaurants)
 print(C+R, "个目的地：", coordinate)
 # #   选好了n个节点，接下来开始生成图
 
-graph = np.zeros((C + R, C + R))
+CRgraph = np.zeros((C + R, C + R))
 
-edge = [[0 for i in range(col)] for j in range(row)]
+CRedge = [[0 for i in range(col)] for j in range(row)]
 #生成CR图
 for i in range(0, C + R):
     for j in range(0, C + R):
@@ -291,22 +270,13 @@ for i in range(0, C + R):
             # print("min road:",m_road)
             # print(f)
             # print(len(f))
-            graph[i, j] = cost(f)
-            edge[i][j] = f
+            CRgraph[i, j] = cost(f)
+            CRedge[i][j] = f
 
         else:
-            graph[i, j] = -1
+            CRgraph[i, j] = -1
 
         del f
-print(graph)
-print(edge)
+print(CRgraph)
+print(CRedge)
 
-while RUN:
-    back = []
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            RUN = False
-    # 搭建基础环境
-    _navigation(MAP, BS, back)
-    pygame.display.update()
-    pygame.time.delay(100)
