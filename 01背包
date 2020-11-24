@@ -1,0 +1,27 @@
+import numpy as np
+import pandas as pd
+def knapsack(things,C):
+    n=len(things['s'])+1
+    x=list(range(0,C+1))
+    y=list(range(0,n))
+    a=np.zeros((n, C+1))
+    b=pd.DataFrame(a,index=y,columns=x)
+    for i in range(1,n):
+        for j in range(1,C+1):
+            b.loc[i,j]=b.loc[i-1,j]
+            if things['s'][i-1] <=j:
+                b.loc[i,j]=max(b.loc[i-1,j],b.loc[i-1,j-things['s'][i-1]]+things['v'][i-1])
+    return b
+
+
+
+
+# 物品
+things={
+    's':[2,3,4,5],
+    'v':[3,4,1,7]
+}
+# 背包容量
+C=9
+b=knapsack(things,C)
+print(b)
